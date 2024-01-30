@@ -1,5 +1,15 @@
-canvas {
-  width: 320px;
-  height: 480px;
+*{
+  padding: 0;
+  margin: 0;
+}
+:root {
+  --screenWidth: 320px;
+  --screenHeight: 480px;
+}
+#game-view {
+  width: var(--screenWidth);
+  height: var(--screenHeight);
+  display: block;
   border: 1px solid black;
+  margin: 200px auto;
 }
