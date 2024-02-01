@@ -162,7 +162,7 @@ class Obsacle {
     width = 0;
     height = 0;
     stateToView = 1;
-    constructor(sX, sY, width, height, x, y, stateToView) {
+    constructor(sX, sY, width, height, x, y, stateToView, mainCharacter) {
         this.sX = sX;
         this.sY = sY;
         this.x = x;
@@ -170,6 +170,7 @@ class Obsacle {
         this.width = width;
         this.height = height;
         this.stateToView = stateToView;
+        this.mainCharacter = mainCharacter;
     }
 
     draw() {
@@ -188,14 +189,27 @@ class PairPipes extends Obsacle {
     positionOfToPipe = [];
     maxYPosition = -150; //for limit the top pipe
 
-    constructor(botSX, botSY, topSX, topSY, gap, quantityMove, stateToView) {
-        super(0, 0, 53, 400, 0, 0, stateToView);
+    constructor(botSX, botSY, topSX, topSY, gap, quantityMove, stateToView, mainCharacter) {
+        super(0, 0, 53, 400, 0, 0, stateToView, mainCharacter);
         this.bottom.sX = botSX;
         this.bottom.sY = botSY;
         this.top.sX = topSX;
         this.top.sY = topSY;
         this.gap = gap;
         this.quantityMove = quantityMove;
+    }
+
+    mainCharacterCollision(pipesPos) {
+        if ((this.mainCharacter.x + this.mainCharacter.width / 2 >= pipesPos.x  && 
+        this.mainCharacter.y - this.mainCharacter.height / 2 <= pipesPos.y + this.height)) {
+            return true;
+        } 
+        
+        if ((this.mainCharacter.x + this.mainCharacter.width / 2 >= pipesPos.x && 
+        this.mainCharacter.y + this.mainCharacter.height / 2 >= pipesPos.y + this.height + this.gap)) {
+            return true;
+        }
+        return false;
     }
 
     draw() {
@@ -221,13 +235,25 @@ class PairPipes extends Obsacle {
                     y: this.maxYPosition * (Math.random() + 1)
                 });
             }
+            // if (this.positionOfToPipe.length > 0 &&
+            //     this.positionOfToPipe[0].x < this.mainCharacter.x - this.mainCharacter.width/2) {
+            //     scoreGame.value += 1;
+            //     scoreGame.bestScore = Math.max(scoreGame.value, scoreGame.bestScore);
+            //     localStorage.setItem("bestScore", scoreGame.bestScore);
+            // }
             for (let i = 0; i < this.positionOfToPipe.length; i++) {
                 let p = this.positionOfToPipe[i];
-                p.x -= this.quantityMove;
+                
+                if (this.mainCharacterCollision(p))
+                    gameState.current = gameState.gameOver;
 
+                p.x -= this.quantityMove; //move the pipes to the left
                 //delete pipe goes beyond the canvas
                 if (p.x + this.width < 0) {
                     this.positionOfToPipe.shift();
+                    scoreGame.value += 1;
+                    scoreGame.bestScore = Math.max(scoreGame.value, scoreGame.bestScore);
+                    localStorage.setItem("bestScore", scoreGame.bestScore);
                 }
             }
         }
@@ -277,9 +303,29 @@ const foreground = {
     }
 }
 
-function collisionDetection() {
+const scoreGame = {
+    bestScore: parseInt(localStorage.getItem("bestScore")) || 0,
+    value: 0,
+    draw: function() {
+        canvasContex.fillStyle = "#FFF";
+        canvasContex.strokeStyle = "#000";
 
+        if (gameState.current == gameState.inGame) {
+            canvasContex.lineWidth = 2;
+            canvasContex.font = "35px Teko";
+            canvasContex.fillText(this.value, canvasElement.width/2, 50);
+            canvasContex.strokeText(this.value, canvasElement.width/2, 50);
+        }
+        else if (gameState.current == gameState.gameOver){
+            canvasContex.font = "25px Teko";
+            canvasContex.fillText(this.value, 225, 186);
+            canvasContex.strokeText(this.value, 225, 186);
+            canvasContex.fillText(this.bestScore, 225, 228);
+            canvasContex.strokeText(this.bestScore, 225, 228);
+        }
+    }
 }
+
 
 //////////////// INIT ////////////////
 let bird = new MainCharacter(50, 150, 34, 26);
@@ -293,7 +339,7 @@ readyMessage.centerX();
 let gameoverMessage = new NotifyMessage(175, 228, 225, 202, 80, 90, gameState.gameOver);
 gameoverMessage.centerX();
 
-let pipes = new PairPipes(502, 0, 553, 0, 85, 2, gameState.inGame);
+let pipes = new PairPipes(502, 0, 553, 0, 85, 2, gameState.inGame, bird);
 //////////////////////////////////////
 
 function draw() {
@@ -305,6 +351,7 @@ function draw() {
     bird.draw();
     readyMessage.draw();
     gameoverMessage.draw();
+    scoreGame.draw();
 }
 
 function updateImage() {
