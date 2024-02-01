@@ -24,12 +24,30 @@ canvasElement.addEventListener("click", function(event) {
             bird.flap();
             break;
         case gameState.gameOver:
-            gameState.current = gameState.getReady;
+            let rect = canvasElement.getBoundingClientRect();
+            let clickX = event.clientX - rect.left;
+            let clickY = event.clientY - rect.top;
+            if (clickX >= startButton.x && clickX <= startButton.x + startButton.width
+                && clickY >= startButton.y && clickY <= startButton.y + startButton.height) {
+                    bird.resetToReady();
+                    pipes.resetToReady();
+                    scoreGame.resetToReady()
+                    gameState.current = gameState.getReady;
+                }
+            
             break;
         default:
             console.log("error");
     }
 });
+
+const startButton = {
+    x: 120,
+    y: 263,
+    width: 83, 
+    height: 29,
+}
+
 class Character {
     animationImg = [];
     x = 0;
@@ -70,6 +88,12 @@ class MainCharacter extends Character {
         this.speed = -this.jump;
     }
 
+    resetToReady() {
+        this.speed = 0;
+        this.rotaion = 0 * DEGREE;
+        this.y = 150; //set the bird to initial position
+        
+    }
     draw() {
         let currentFrame = this.animationImg[this.frame];
         canvasContex.save();
@@ -90,8 +114,7 @@ class MainCharacter extends Character {
         this.frame = this.frame % this.addAnimationImg.length;
 
         if (gameState.current == gameState.getReady) {
-            this.y = 150; //set the bird to initial position
-            this.rotaion = 0 * DEGREE;
+            this.resetToReady()
         }
         else {
             this.speed += this.gravity;
@@ -199,6 +222,9 @@ class PairPipes extends Obsacle {
         this.quantityMove = quantityMove;
     }
 
+    resetToReady() {
+        this.positionOfToPipe = [];
+    }
     mainCharacterCollision(pipesPos) {
         if ((this.mainCharacter.x + this.mainCharacter.width / 2 >= pipesPos.x  && 
         this.mainCharacter.y - this.mainCharacter.height / 2 <= pipesPos.y + this.height)) {
@@ -323,6 +349,10 @@ const scoreGame = {
             canvasContex.fillText(this.bestScore, 225, 228);
             canvasContex.strokeText(this.bestScore, 225, 228);
         }
+    },
+
+    resetToReady: function() {
+        this.value = 0;
     }
 }
 
