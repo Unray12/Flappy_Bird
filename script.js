@@ -31,7 +31,6 @@ canvasElement.addEventListener("click", function(event) {
                 && clickY >= startButton.y && clickY <= startButton.y + startButton.height) {
                     bird.resetToReady();
                     pipes.resetToReady();
-                    scoreGame.resetToReady()
                     gameState.current = gameState.getReady;
                 }
             
@@ -79,7 +78,28 @@ class MainCharacter extends Character {
     jump = 4;
     speed = 0;
     rotaion = 0;
-
+    scoreGame = {
+        bestScore: parseInt(localStorage.getItem("bestScore")) || 0,
+        value: 0,
+        draw: function() {
+            canvasContex.fillStyle = "#FFF";
+            canvasContex.strokeStyle = "#000";
+    
+            if (gameState.current == gameState.inGame) {
+                canvasContex.lineWidth = 2;
+                canvasContex.font = "35px Teko";
+                canvasContex.fillText(this.value, canvasElement.width/2, 50);
+                canvasContex.strokeText(this.value, canvasElement.width/2, 50);
+            }
+            else if (gameState.current == gameState.gameOver){
+                canvasContex.font = "25px Teko";
+                canvasContex.fillText(this.value, 225, 186);
+                canvasContex.strokeText(this.value, 225, 186);
+                canvasContex.fillText(this.bestScore, 225, 228);
+                canvasContex.strokeText(this.bestScore, 225, 228);
+            }
+        },
+    }
     constructor(x, y, width, height) {
         super(x, y, width, height);
     }
@@ -92,6 +112,7 @@ class MainCharacter extends Character {
         this.speed = 0;
         this.rotaion = 0 * DEGREE;
         this.y = 150; //set the bird to initial position
+        this.scoreGame.value = 0; //reset score
         
     }
     draw() {
@@ -102,7 +123,6 @@ class MainCharacter extends Character {
         //because the canvas origin is the bird center
         canvasContex.drawImage(sprite, currentFrame.sX, currentFrame.sY, 
             this.width, this.height, -this.width/2, -this.height/2, this.width, this.height);
-        
         canvasContex.restore();
     }
     updateImage() {
@@ -119,7 +139,7 @@ class MainCharacter extends Character {
         else {
             this.speed += this.gravity;
             this.y += this.speed;
-            //condition lose game
+            //condition falling to lose game
             if (this.y + this.height/2 >= canvasElement.height - foreground.height) {
                 this.y = canvasElement.height - foreground.height - this.height/2;
                 if (gameState.current == gameState.inGame)
@@ -129,7 +149,7 @@ class MainCharacter extends Character {
             if (this.speed < this.jump) {//the bird flapping
                 this.rotaion = -25 * DEGREE;
             } 
-            else if (this.speed - this.jump < 2){
+            else if (this.speed - this.jump < 1){
                 this.rotaion = 25 * DEGREE;
                 this.frame = 1; //falling so stop flapping
             }
@@ -277,9 +297,9 @@ class PairPipes extends Obsacle {
                 //delete pipe goes beyond the canvas
                 if (p.x + this.width < 0) {
                     this.positionOfToPipe.shift();
-                    scoreGame.value += 1;
-                    scoreGame.bestScore = Math.max(scoreGame.value, scoreGame.bestScore);
-                    localStorage.setItem("bestScore", scoreGame.bestScore);
+                    this.mainCharacter.scoreGame.value += 1;
+                    this.mainCharacter.scoreGame.bestScore = Math.max(this.mainCharacter.scoreGame.value, this.mainCharacter.scoreGame.bestScore);
+                    localStorage.setItem("bestScore", this.mainCharacter.scoreGame.bestScore);
                 }
             }
         }
@@ -329,33 +349,6 @@ const foreground = {
     }
 }
 
-const scoreGame = {
-    bestScore: parseInt(localStorage.getItem("bestScore")) || 0,
-    value: 0,
-    draw: function() {
-        canvasContex.fillStyle = "#FFF";
-        canvasContex.strokeStyle = "#000";
-
-        if (gameState.current == gameState.inGame) {
-            canvasContex.lineWidth = 2;
-            canvasContex.font = "35px Teko";
-            canvasContex.fillText(this.value, canvasElement.width/2, 50);
-            canvasContex.strokeText(this.value, canvasElement.width/2, 50);
-        }
-        else if (gameState.current == gameState.gameOver){
-            canvasContex.font = "25px Teko";
-            canvasContex.fillText(this.value, 225, 186);
-            canvasContex.strokeText(this.value, 225, 186);
-            canvasContex.fillText(this.bestScore, 225, 228);
-            canvasContex.strokeText(this.bestScore, 225, 228);
-        }
-    },
-
-    resetToReady: function() {
-        this.value = 0;
-    }
-}
-
 
 //////////////// INIT ////////////////
 let bird = new MainCharacter(50, 150, 34, 26);
@@ -369,7 +362,7 @@ readyMessage.centerX();
 let gameoverMessage = new NotifyMessage(175, 228, 225, 202, 80, 90, gameState.gameOver);
 gameoverMessage.centerX();
 
-let pipes = new PairPipes(502, 0, 553, 0, 85, 2, gameState.inGame, bird);
+let pipes = new PairPipes(502, 0, 553, 0, 90, 2, gameState.inGame, bird);
 //////////////////////////////////////
 
 function draw() {
@@ -377,11 +370,13 @@ function draw() {
     canvasContex.fillRect(0, 0, canvasElement.width, canvasElement.height);
     background.draw();
     pipes.draw(); //under foreground on background
+    
     foreground.draw();
     bird.draw();
     readyMessage.draw();
     gameoverMessage.draw();
-    scoreGame.draw();
+    bird.scoreGame.draw();
+    
 }
 
 function updateImage() {
