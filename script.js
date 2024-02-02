@@ -263,7 +263,7 @@ class PairPipes extends Obsacle {
             let p = this.positionOfToPipe[i];
             let topYPos = p.y;
             let bottomYPos = p.y + this.height + this.gap;
-
+            
             //TOP PIPE
             canvasContex.drawImage(sprite, this.top.sX, this.top.sY, this.width, 
                 this.height, p.x, topYPos, this.width, this.height);
@@ -289,10 +289,12 @@ class PairPipes extends Obsacle {
             // }
             for (let i = 0; i < this.positionOfToPipe.length; i++) {
                 let p = this.positionOfToPipe[i];
-                
                 if (this.mainCharacterCollision(p))
                     gameState.current = gameState.gameOver;
 
+                if (p.x - this.mainCharacter.x < 10) //have fun
+                    p.y += 2;
+                    
                 p.x -= this.quantityMove; //move the pipes to the left
                 //delete pipe goes beyond the canvas
                 if (p.x + this.width < 0) {
