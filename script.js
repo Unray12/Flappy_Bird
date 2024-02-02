@@ -331,7 +331,7 @@ const foreground = {
     height: 112,
     x: 0,
     y: canvasElement.height - 112,
-    quantityMove: 1.5,
+    quantityMove: 1,
 
     draw: function() {
         canvasContex.drawImage(sprite, this.sX, this.sY, this.width, 
