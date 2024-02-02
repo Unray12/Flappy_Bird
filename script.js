@@ -293,7 +293,7 @@ class PairPipes extends Obsacle {
                     gameState.current = gameState.gameOver;
 
                 if (p.x - this.mainCharacter.x < 10) //have fun
-                    p.y += 3;
+                    p.y += 2;
 
                 p.x -= this.quantityMove; //move the pipes to the left
                 //delete pipe goes beyond the canvas
