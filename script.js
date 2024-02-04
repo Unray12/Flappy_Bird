@@ -7,6 +7,19 @@ const DEGREE = Math.PI/180 //DEGREE to radian
 const sprite = new Image();
 sprite.src = "assets/images/sprite.png";
 
+//////////////// LOAD SOUND ////////////////
+const scoreSound = new Audio();
+scoreSound.src = "assets/audio/sfx_point.wav";
+const flapSound = new Audio();
+flapSound.src = "assets/audio/sfx_flap.wav";
+const hitSound = new Audio();
+hitSound.src = "assets/audio/sfx_hit.wav";
+const swooshSound = new Audio();
+swooshSound.src = "assets/audio/sfx_swooshing.wav";
+const mainCharDieSound = new Audio();
+mainCharDieSound.src = "assets/audio/sfx_die.wav";
+////////////////////////////////////////////
+
 const gameState = {
     current: 0,
     getReady: 0,
@@ -19,6 +32,7 @@ canvasElement.addEventListener("click", function(event) {
     switch (gameState.current) {
         case gameState.getReady:
             gameState.current = gameState.inGame;
+            swooshSound.play();
             break;
         case gameState.inGame:
             bird.flap();
@@ -106,6 +120,7 @@ class MainCharacter extends Character {
 
     flap() {
         this.speed = -this.jump;
+        flapSound.play();
     }
 
     resetToReady() {
@@ -142,8 +157,10 @@ class MainCharacter extends Character {
             //condition falling to lose game
             if (this.y + this.height/2 >= canvasElement.height - foreground.height) {
                 this.y = canvasElement.height - foreground.height - this.height/2;
-                if (gameState.current == gameState.inGame)
+                if (gameState.current == gameState.inGame) {
                     gameState.current = gameState.gameOver;
+                    mainCharDieSound.play();
+                }
             }
             
             if (this.speed < this.jump) {//the bird flapping
@@ -289,11 +306,13 @@ class PairPipes extends Obsacle {
             // }
             for (let i = 0; i < this.positionOfToPipe.length; i++) {
                 let p = this.positionOfToPipe[i];
-                if (this.mainCharacterCollision(p))
+                if (this.mainCharacterCollision(p)) {
+                    hitSound.play();
                     gameState.current = gameState.gameOver;
+                }
 
-                if (p.x - this.mainCharacter.x < 10) //have fun
-                    p.y += 2;
+                // if (p.x - this.mainCharacter.x < 10) //have fun
+                //     p.y += 2;
 
                 p.x -= this.quantityMove; //move the pipes to the left
                 //delete pipe goes beyond the canvas
@@ -302,6 +321,7 @@ class PairPipes extends Obsacle {
                     this.mainCharacter.scoreGame.value += 1;
                     this.mainCharacter.scoreGame.bestScore = Math.max(this.mainCharacter.scoreGame.value, this.mainCharacter.scoreGame.bestScore);
                     localStorage.setItem("bestScore", this.mainCharacter.scoreGame.bestScore);
+                    scoreSound.play();
                 }
             }
         }
