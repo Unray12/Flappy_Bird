@@ -248,6 +248,7 @@ class PairPipes extends Obsacle {
     quantityMove = 0;
     positionOfToPipe = [];
     maxYPosition = -150; //for limit the top pipe
+    tolerance = 0.2;
 
     constructor(botSX, botSY, topSX, topSY, gap, quantityMove, stateToView, mainCharacter) {
         super(0, 0, 53, 400, 0, 0, stateToView, mainCharacter);
@@ -263,13 +264,13 @@ class PairPipes extends Obsacle {
         this.positionOfToPipe = [];
     }
     mainCharacterCollision(pipesPos) {
-        if ((this.mainCharacter.x + this.mainCharacter.width / 2 >= pipesPos.x  && 
-        this.mainCharacter.y - this.mainCharacter.height / 2 <= pipesPos.y + this.height)) {
+        if ((this.mainCharacter.x + this.mainCharacter.width / 2 >= pipesPos.x + this.tolerance && 
+        this.mainCharacter.y - this.mainCharacter.height / 2 <= pipesPos.y + this.height - this.tolerance)) {
             return true;
         } 
         
-        if ((this.mainCharacter.x + this.mainCharacter.width / 2 >= pipesPos.x && 
-        this.mainCharacter.y + this.mainCharacter.height / 2 >= pipesPos.y + this.height + this.gap)) {
+        if ((this.mainCharacter.x + this.mainCharacter.width / 2 >= pipesPos.x + this.tolerance && 
+        this.mainCharacter.y + this.mainCharacter.height / 2 >= pipesPos.y + this.height + this.gap + this.tolerance)) {
             return true;
         }
         return false;
