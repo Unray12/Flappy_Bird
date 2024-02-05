@@ -16,8 +16,8 @@ const hitSound = new Audio();
 hitSound.src = "assets/audio/sfx_hit.wav";
 const swooshSound = new Audio();
 swooshSound.src = "assets/audio/sfx_swooshing.wav";
-const mainCharDieSound = new Audio();
-mainCharDieSound.src = "assets/audio/sfx_die.wav";
+const mainCharFallingDieSound = new Audio();
+mainCharFallingDieSound.src = "assets/audio/sfx_die.wav";
 ////////////////////////////////////////////
 
 const gameState = {
@@ -89,7 +89,7 @@ class Character {
 //inheritance of character
 class MainCharacter extends Character {
     gravity = 0.22;
-    jump = 4;
+    jump = 4.6;
     speed = 0;
     rotaion = 0;
     scoreGame = {
@@ -159,7 +159,7 @@ class MainCharacter extends Character {
                 this.y = canvasElement.height - foreground.height - this.height/2;
                 if (gameState.current == gameState.inGame) {
                     gameState.current = gameState.gameOver;
-                    mainCharDieSound.play();
+                    mainCharFallingDieSound.play();
                 }
             }
             
